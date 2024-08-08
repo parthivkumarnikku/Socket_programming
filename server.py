@@ -5,6 +5,26 @@ b = 6
 p = 11
 g = 5
 
+def encode_ascii(response):
+    ascii_values = [ord(char) for char in response]
+    return ascii_values
+
+def decode_ascii(decripted_array):
+    plaintext = ''.join(chr(value) for value in decripted_array)
+    return plaintext
+
+# Encrypting
+def encrypt(response_ascii, key):
+    encrypted_data = [element*key for element in response_ascii]
+    return encrypted_data
+
+# Decrypting
+def decrypt(encrypted_message, key):
+    decrypted_data = [int(element/key) for element in encrypted_message]
+    return decrypted_data
+
+
+
 # Diffie-Hellman - KEP
 def diff_hellman():
     print(f"My random value is {b}")
@@ -48,17 +68,21 @@ while True:
     # Begin communication
     while True:
         data = client_socket.recv(1024).decode("utf-8")
-        print(f"Client: {data}")
-
+        data = decode_ascii(decrypt(data,key))
         if data.lower() == "exit":
             print(f"\nClosed connection with the client {address} !!\n")
             client_socket.close()
             break
+        print(f"Client: {data}")
+
+
 
         response = input("Server: ")
-        client_socket.send(bytes(response, "utf-8"))
-
         if response.lower() == "exit":
             print(f"\nClosed connection with the client {address} !!\n")
             client_socket.close()
             break
+        response=encrypt(encode_ascii(response),key)
+        client_socket.send(bytes(response, "utf-8"))
+
+        
