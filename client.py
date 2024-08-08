@@ -1,35 +1,36 @@
+
 import socket
 import random
 
-# Diffie-Hellman - KEP
-a = 4
-p = 11
-g = 5
+# Diffie-Hellman parameters
+a = random.randint(1, 10)  # Client's private key
+p = 11  # Prime number
+g = 5   # Generator
 
 def encode_ascii(message):
     ascii_values = [ord(char) for char in message]
     return ascii_values
 
-def decode_ascii(decripted_array):
-    plaintext = ''.join(chr(value) for value in decripted_array)
+def decode_ascii(decrypted_array):
+    plaintext = ''.join(chr(value) for value in decrypted_array)
     return plaintext
 
 # Encrypting
 def encrypt(message_ascii, key):
-    encrypted_data = [element*key for element in message_ascii]
+    encrypted_data = [element * key for element in message_ascii]
     return encrypted_data
 
 # Decrypting
 def decrypt(encrypted_message, key):
-    decrypted_data = [int(element/key) for element in encrypted_message]
+    decrypted_data = [int(element / key) for element in encrypted_message]
     return decrypted_data
 
-
-# Diffie-Hellman - KEP
+# Diffie-Hellman Key Exchange
 def diff_hellman():
-    ska = (pow(g, a)) % p
+    ska = pow(g, a, p)
     return ska
 
+# Creating a socket object
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_ip = 'localhost'
 server_port = 9998
@@ -47,31 +48,30 @@ skb_s = client_socket.recv(1024).decode("utf-8")
 skb = int(skb_s)
 print(f"Server's skb: {skb}")
 
-print(f"\nI HAVE BOTH THE KEYS ska - mine : {ska} and skb - server : {skb}")
-
 # Calculate the shared key
-key = (skb * a) % p
+shared_key = pow(skb, a, p)
+print(f"\nShared key: {shared_key}")
 
 # Begin communication
 while True:
-
     message = input("Client: ")
     if message.lower() == "exit":
+        client_socket.send(bytes(message, "utf-8"))  # Send 'exit' without encryption
         client_socket.close()
         print(f"Closed connection with server {server_ip}:{server_port}")
         break
-    message=encrypt(encode_ascii(message),key)
-    client_socket.send(bytes(str(message), "utf-8"))
+    else:
+        encrypted_message = encrypt(encode_ascii(message), shared_key)
+        client_socket.send(bytes(str(encrypted_message), "utf-8"))
 
+    encrypted_response = client_socket.recv(1024).decode("utf-8")
+    encrypted_response = eval(encrypted_response)  # Convert to list
+    response = decode_ascii(decrypt(encrypted_response, shared_key))
 
-    
-    response = eval(client_socket.recv(1024).decode("utf-8"))
-    response = decode_ascii(decrypt(response,key))
     if response.lower() == "exit":
         client_socket.close()
         print(f"Closed connection with server {server_ip}:{server_port}")
         break
-    print(f"Server : {response}")
-    
 
+    print(f"Server: {response}")
 
