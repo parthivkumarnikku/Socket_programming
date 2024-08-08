@@ -2,7 +2,7 @@ import socket
 import random
 
 # Diffie-Hellman parameters
-b = random.randint(1, 10)  # Server's private key
+b = 6
 p = 11  # Prime number
 g = 5   # Generator
 
@@ -40,7 +40,7 @@ server_port = 9998
 # Binding server socket to an IP address and a port
 server_socket.bind((server_ip, server_port))
 
-# Listen for incoming connections (up to 3 queued connections)
+# Listen for incoming connections (up to 3 connections)
 server_socket.listen(3)
 print("Waiting for connections")
 
@@ -64,7 +64,7 @@ while True:
     # Begin communication
     while True:
         received_data = client_socket.recv(1024).decode("utf-8")
-
+        
         # Check if the received message is 'exit'
         if received_data.lower() == "exit":
             print(f"\nClosed connection with the client {address} !!\n")
@@ -72,8 +72,8 @@ while True:
             break
 
         encrypted_data = eval(received_data)  # Convert to list
+        print(f"Recieved message - cipher : {encrypted_data}")
         data = decode_ascii(decrypt(encrypted_data, shared_key))
-
         print(f"Client: {data}")
 
         response = input("Server: ")
@@ -84,5 +84,7 @@ while True:
             break
         else:
             encrypted_response = encrypt(encode_ascii(response), shared_key)
+            print(f"encrypted response : {encrypted_response}")
             client_socket.send(bytes(str(encrypted_response), "utf-8"))
 
+    print("Waiting for Connections .... ")

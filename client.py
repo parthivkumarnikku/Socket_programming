@@ -3,7 +3,7 @@ import socket
 import random
 
 # Diffie-Hellman parameters
-a = random.randint(1, 10)  # Client's private key
+a = 4
 p = 11  # Prime number
 g = 5   # Generator
 
@@ -62,16 +62,19 @@ while True:
         break
     else:
         encrypted_message = encrypt(encode_ascii(message), shared_key)
+        print(f"encrypted message : {encrypted_message}")
         client_socket.send(bytes(str(encrypted_message), "utf-8"))
 
-    encrypted_response = client_socket.recv(1024).decode("utf-8")
-    encrypted_response = eval(encrypted_response)  # Convert to list
-    response = decode_ascii(decrypt(encrypted_response, shared_key))
-
-    if response.lower() == "exit":
+    recieved_response = client_socket.recv(1024).decode("utf-8")
+    if recieved_response.lower() == "exit":
         client_socket.close()
         print(f"Closed connection with server {server_ip}:{server_port}")
         break
+    encrypted_response = eval(recieved_response)  # Convert to list
+    print(f"Recieved response - cipher: {encrypted_response}")
+    response = decode_ascii(decrypt(encrypted_response, shared_key))
+
+    
 
     print(f"Server: {response}")
 
