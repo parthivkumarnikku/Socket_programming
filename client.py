@@ -65,7 +65,7 @@ while True:
 
 
     
-    response = client_socket.recv(1024).decode("utf-8")
+    response = eval(client_socket.recv(1024).decode("utf-8"))
     response = decode_ascii(decrypt(response,key))
     if response.lower() == "exit":
         client_socket.close()

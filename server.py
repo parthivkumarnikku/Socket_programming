@@ -67,7 +67,7 @@ while True:
 
     # Begin communication
     while True:
-        data = client_socket.recv(1024).decode("utf-8")
+        data = eval(client_socket.recv(1024).decode("utf-8"))
         data = decode_ascii(decrypt(data,key))
         if data.lower() == "exit":
             print(f"\nClosed connection with the client {address} !!\n")
@@ -83,6 +83,6 @@ while True:
             client_socket.close()
             break
         response=encrypt(encode_ascii(response),key)
-        client_socket.send(bytes(response, "utf-8"))
+        client_socket.send(bytes(str(response), "utf-8"))
 
         
